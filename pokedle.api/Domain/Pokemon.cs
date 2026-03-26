@@ -9,6 +9,6 @@ public class Pokemon
     public int HabitatId { get; set; }
     public Habitat? Habitat { get; set; }
     public int ColorId { get; set; }
-    public Color? Color { get; set; }
+    public PokemonColor? Color { get; set; }
     public ICollection<PokemonElementType> PokemonElementTypes { get; set; } = [];
 }
