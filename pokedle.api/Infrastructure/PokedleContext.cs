@@ -1,0 +1,21 @@
+using Microsoft.EntityFrameworkCore;
+using Pokedle.Api.Domain;
+using System.Reflection;
+
+namespace Pokedle.Api.Infrastructure;
+
+public class PokedleContext(DbContextOptions<PokedleContext> options)
+    : DbContext(options)
+{
+    public DbSet<Pokemon> Pokemons { get; set; }
+    public DbSet<Habitat> Habitats { get; set; }
+    public DbSet<PokemonColor> Colors { get; set; }
+    public DbSet<PokemonElementType> PokemonElementTypes { get; set; }
+    public DbSet<ElementType> ElementTypes { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+        base.OnModelCreating(modelBuilder);
+    }
+}
