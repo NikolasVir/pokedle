@@ -46,3 +46,6 @@ msbuild.wrn
 # Node.js build artifacts
 node_modules/
 .fake
+
+# Specific .net files
+appsettings.Development.json
