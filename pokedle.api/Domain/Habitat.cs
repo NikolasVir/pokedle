@@ -1,4 +1,4 @@
-namespace pokedle.api.Domain;
+namespace Pokedle.Api.Domain;
 
 public class Habitat
 {
