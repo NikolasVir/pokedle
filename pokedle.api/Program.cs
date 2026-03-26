@@ -3,7 +3,8 @@ using Pokedle.Api.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var connectionString = "Host=127.0.0.1;Port=5432;Database=pokedle;Username=pokedle;Password=pokedle";
+var connectionString = builder.Configuration.GetConnectionString("Default")
+    ?? throw new InvalidOperationException("Connection string 'Default' not found.");
 
 builder.Services.AddDbContext<PokedleContext>(options =>
     options.UseNpgsql(connectionString)
