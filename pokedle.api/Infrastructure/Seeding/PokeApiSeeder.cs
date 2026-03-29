@@ -1,0 +1,126 @@
+using Microsoft.EntityFrameworkCore;
+using PokeApiNet;
+using Pokedle.Api.Domain;
+using Pokemon = Pokedle.Api.Domain.Pokemon;
+using PokemonColor = Pokedle.Api.Domain.PokemonColor;
+
+namespace Pokedle.Api.Infrastructure.Seeding;
+
+public class PokeApiSeeder(PokedleContext context, PokeApiClient pokeApi)
+{
+    public async Task SeedAsync()
+    {
+        if (await context.Pokemons.AnyAsync())
+        {
+            Console.WriteLine("Database already seeded, skipping.");
+            return;
+        }
+
+        Console.WriteLine("Fetching all pokemon from PokeAPI...");
+
+        var page = await pokeApi.GetNamedResourcePageAsync<PokeApiNet.Pokemon>(limit: 10000, offset: 0);
+
+        foreach (var resource in page.Results)
+        {
+            Console.WriteLine($"Seeding {resource.Name}...");
+
+            var apiPokemon = await pokeApi.GetResourceAsync<PokeApiNet.Pokemon>(resource.Name);
+            var species = await pokeApi.GetResourceAsync(apiPokemon.Species);
+
+            var habitatName = species.Habitat?.Name ?? "unknown";
+            var habitat = await GetOrCreateHabitat(habitatName);
+
+            var color = await GetOrCreateColor(species.Color.Name);
+            var evoStage = await GetEvolutionStage(species);
+            var generation = GetGeneration(apiPokemon.Id);
+
+            var pokemon = new Pokemon
+            {
+                Id = apiPokemon.Id,
+                Name = apiPokemon.Name,
+                Generation = generation,
+                EvolutionStage = evoStage,
+                ColorId = color.Id,
+                HabitatId = habitat.Id
+            };
+
+            context.Pokemons.Add(pokemon);
+            await context.SaveChangesAsync();
+
+            foreach (var typeSlot in apiPokemon.Types)
+            {
+                var elementType = await GetOrCreateElementType(typeSlot.Type.Name);
+                context.PokemonElementTypes.Add(new PokemonElementType
+                {
+                    PokemonId = pokemon.Id,
+                    ElementTypeId = elementType.Id,
+                    Slot = typeSlot.Slot
+                });
+            }
+
+            await context.SaveChangesAsync();
+        }
+
+        Console.WriteLine("Seeding complete!");
+    }
+
+    private async Task<PokemonColor> GetOrCreateColor(string name)
+    {
+        var existing = await context.Colors.FirstOrDefaultAsync(c => c.Name == name);
+        if (existing != null) return existing;
+        var color = new PokemonColor { Name = name };
+        context.Colors.Add(color);
+        await context.SaveChangesAsync();
+        return color;
+    }
+
+    private async Task<Habitat> GetOrCreateHabitat(string name)
+    {
+        var existing = await context.Habitats.FirstOrDefaultAsync(h => h.Name == name);
+        if (existing != null) return existing;
+        var habitat = new Habitat { Name = name };
+        context.Habitats.Add(habitat);
+        await context.SaveChangesAsync();
+        return habitat;
+    }
+
+    private async Task<ElementType> GetOrCreateElementType(string name)
+    {
+        var existing = await context.ElementTypes.FirstOrDefaultAsync(e => e.Name == name);
+        if (existing != null) return existing;
+        var elementType = new ElementType { Name = name };
+        context.ElementTypes.Add(elementType);
+        await context.SaveChangesAsync();
+        return elementType;
+    }
+
+    private async Task<int> GetEvolutionStage(PokemonSpecies species)
+    {
+        var chain = await pokeApi.GetResourceAsync(species.EvolutionChain);
+        return FindStage(chain.Chain, species.Name, 1);
+    }
+
+    private static int FindStage(ChainLink link, string name, int stage)
+    {
+        if (link.Species.Name == name) return stage;
+        foreach (var next in link.EvolvesTo)
+        {
+            var result = FindStage(next, name, stage + 1);
+            if (result != -1) return result;
+        }
+        return -1; // not found
+    }
+
+    private static int GetGeneration(int pokemonId) => pokemonId switch
+    {
+        <= 151 => 1,
+        <= 251 => 2,
+        <= 386 => 3,
+        <= 493 => 4,
+        <= 649 => 5,
+        <= 721 => 6,
+        <= 809 => 7,
+        <= 905 => 8,
+        _ => 9
+    };
+}
