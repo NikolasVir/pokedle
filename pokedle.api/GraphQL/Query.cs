@@ -6,15 +6,16 @@ namespace Pokedle.Api.GraphQL;
 
 public class Query
 {
-    public async Task<List<Pokemon>> GetAllPokemon([Service] PokedleContext context) =>
-        await context.Pokemons
+    [UseFiltering]
+    [UseSorting]
+    public IQueryable<Pokemon> GetAllPokemon([Service] PokedleContext context) =>
+        context.Pokemons
             .Where(p => p.Id < 10000)
             .Include(p => p.Habitat)
             .Include(p => p.Color)
             .Include(p => p.PokemonElementTypes)
                 .ThenInclude(pet => pet.ElementType)
-            .OrderBy(p => p.Id)
-            .ToListAsync();
+            .OrderBy(p => p.Id);
 
     public async Task<int> GetDailyPokemonId([Service] PokedleContext context)
     {

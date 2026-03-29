@@ -17,7 +17,9 @@ builder.Services.AddSingleton<PokeApiClient>();
 builder.Services.AddScoped<PokeApiSeeder>();
 builder.Services
     .AddGraphQLServer()
-    .AddQueryType<Query>();
+    .AddQueryType<Query>()
+    .AddFiltering()
+    .AddSorting();
 
 var app = builder.Build();
 
