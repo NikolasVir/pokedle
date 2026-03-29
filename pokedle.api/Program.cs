@@ -18,6 +18,7 @@ builder.Services.AddScoped<PokeApiSeeder>();
 builder.Services
     .AddGraphQLServer()
     .AddQueryType<Query>()
+    .AddMutationType<Mutation>()
     .AddFiltering()
     .AddSorting();
 
