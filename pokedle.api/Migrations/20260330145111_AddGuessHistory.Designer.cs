@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Pokedle.Api.Infrastructure;
@@ -11,9 +12,11 @@ using Pokedle.Api.Infrastructure;
 namespace Pokedle.Api.Migrations
 {
     [DbContext(typeof(PokedleContext))]
-    partial class PokedleContextModelSnapshot : ModelSnapshot
+    [Migration("20260330145111_AddGuessHistory")]
+    partial class AddGuessHistory
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

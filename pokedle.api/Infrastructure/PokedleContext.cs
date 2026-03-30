@@ -12,6 +12,7 @@ public class PokedleContext(DbContextOptions<PokedleContext> options)
     public DbSet<PokemonColor> Colors { get; set; }
     public DbSet<PokemonElementType> PokemonElementTypes { get; set; }
     public DbSet<ElementType> ElementTypes { get; set; }
+    public DbSet<GuessHistory> GuessHistories { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
