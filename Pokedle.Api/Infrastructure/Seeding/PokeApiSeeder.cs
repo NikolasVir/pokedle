@@ -6,23 +6,23 @@ using PokemonColor = Pokedle.Api.Domain.PokemonColor;
 
 namespace Pokedle.Api.Infrastructure.Seeding;
 
-public class PokeApiSeeder(PokedleContext context, PokeApiClient pokeApi)
+public class PokeApiSeeder(PokedleContext context, PokeApiClient pokeApi, ILogger<PokeApiSeeder> logger)
 {
     public async Task SeedAsync()
     {
         if (await context.Pokemons.AnyAsync())
         {
-            Console.WriteLine("Database already seeded, skipping.");
+            logger.LogWarning("Database already seeded, skipping");
             return;
         }
 
-        Console.WriteLine("Fetching all pokemon from PokeAPI...");
+        logger.LogInformation("Fetching all pokemon from PokeAPI");
 
         var page = await pokeApi.GetNamedResourcePageAsync<PokeApiNet.Pokemon>(limit: 10000, offset: 0);
 
         foreach (var resource in page.Results)
         {
-            Console.WriteLine($"Seeding {resource.Name}...");
+            logger.LogInformation("Seeding {PokemonName}", resource.Name);
 
             var apiPokemon = await pokeApi.GetResourceAsync<PokeApiNet.Pokemon>(resource.Name);
             var species = await pokeApi.GetResourceAsync(apiPokemon.Species);
@@ -61,7 +61,7 @@ public class PokeApiSeeder(PokedleContext context, PokeApiClient pokeApi)
             await context.SaveChangesAsync();
         }
 
-        Console.WriteLine("Seeding complete!");
+        logger.LogInformation("Seeded {Count} Pokemon", page.Results.Count);
     }
 
     private async Task<PokemonColor> GetOrCreateColor(string name)
