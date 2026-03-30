@@ -3,9 +3,9 @@ using Pokedle.Api.Infrastructure;
 
 namespace Pokedle.Api.GraphQL;
 
-public class Mutation(PokedleContext context, ILogger<Mutation> logger)
+public class Mutation()
 {
-    public async Task<GuessResult> Guess(string pokemonName)
+    public async Task<GuessResult> Guess(string pokemonName, [Service] PokedleContext context, [Service] ILogger<Mutation> logger)
     {
         var today = DateOnly.FromDateTime(DateTime.UtcNow);
         var seed = today.DayNumber;
