@@ -3,9 +3,9 @@ using Pokedle.Api.Infrastructure;
 
 namespace Pokedle.Api.GraphQL;
 
-public class Mutation
+public class Mutation(PokedleContext context, ILogger<Mutation> logger)
 {
-    public async Task<GuessResult> Guess(string pokemonName, [Service] PokedleContext context)
+    public async Task<GuessResult> Guess(string pokemonName)
     {
         var today = DateOnly.FromDateTime(DateTime.UtcNow);
         var seed = today.DayNumber;
@@ -58,7 +58,7 @@ public class Mutation
             return new TypeSlotHint { TypeName = typeName, Hint = Hint.Wrong };
         }
 
-        return new GuessResult
+        var result = new GuessResult
         {
             GuessPokemon = guess.Name,
             Generation = guess.Generation == daily.Generation ? Hint.Correct
@@ -69,5 +69,14 @@ public class Mutation
             Types = new TypeHintResult { Slot1 = GetSlotHint(0), Slot2 = GetSlotHint(1) },
             IsCorrect = guess.Id == daily.Id
         };
+
+        logger.LogInformation(
+            "Guess result: {PokemonName} vs daily={DailyPokemonId} result={@Result}",
+            guess.Name,
+            daily.Id,
+            result
+        );
+
+        return result;
     }
 }
