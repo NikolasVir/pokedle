@@ -49,3 +49,7 @@ node_modules/
 
 # Specific .net files
 appsettings.Development.json
+
+# Logs folder
+
+logs
