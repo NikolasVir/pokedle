@@ -33,7 +33,22 @@ try
         .AddFiltering()
         .AddSorting();
 
+    builder.Services.AddCors(options =>
+    {
+        options.AddPolicy("AllowFrontend", policy =>
+        {
+            var origins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>()
+                ?? throw new InvalidOperationException("AllowedOrigins not configured.");
+
+            policy.WithOrigins(origins)
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
+    });
+
     var app = builder.Build();
+
+    app.UseCors("AllowFrontend");
 
     app.UseSerilogRequestLogging();
 
