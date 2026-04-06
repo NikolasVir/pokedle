@@ -3,10 +3,11 @@ import { Header } from './components/header/header';
 import { GuessMessage } from './components/guess-message/guess-message';
 import { PokemonService } from './pokemon.service';
 import { GuessSearch } from './components/guess-search/guess-search';
+import { GuessList } from './components/guess-list/guess-list';
 
 @Component({
   selector: 'app-root',
-  imports: [Header, GuessMessage, GuessSearch],
+  imports: [Header, GuessMessage, GuessSearch, GuessList],
   templateUrl: './app.html',
   styleUrl: './app.css',
 })

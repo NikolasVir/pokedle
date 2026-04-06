@@ -1,0 +1,15 @@
+<div>
+  @for (guess of gameService.guesses(); track guess.guessPokemon) {
+    <div class="pokemon-textbox">
+      <span>{{ guess.guessPokemon }}: </span>
+      <span>Gen {{ getHint(guess.generation) }}</span>
+      <span>Color {{ guess.color.colorName }} {{ getHint(guess.color.hint) }}</span>
+      <span>{{ guess.types.slot1.typeName }} {{ getHint(guess.types.slot1.hint) }}</span>
+      @if (guess.types.slot2) {
+        <span>{{ guess.types.slot2.typeName }} {{ getHint(guess.types.slot2.hint) }}</span>
+      } @else {
+        <span>-</span>
+      }
+    </div>
+  }
+</div>

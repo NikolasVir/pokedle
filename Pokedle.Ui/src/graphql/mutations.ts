@@ -4,7 +4,10 @@ export const GUESS_MUTATION = (pokemonName: string) => `
       guessPokemon
       generation
       habitat
-      color
+      color {
+        colorName
+        hint
+      }
       types {
         slot1 { typeName hint }
         slot2 { typeName hint }
