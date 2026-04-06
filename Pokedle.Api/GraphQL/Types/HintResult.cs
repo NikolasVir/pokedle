@@ -14,7 +14,7 @@ public class GuessResult
     public string GuessPokemon { get; set; } = default!;
     public Hint Generation { get; set; }
     public Hint Habitat { get; set; }
-    public Hint Color { get; set; }
+    public ColorResult Color { get; set; } = null!;
     public TypeHintResult Types { get; set; } = default!;
     public bool IsCorrect { get; set; }
 }

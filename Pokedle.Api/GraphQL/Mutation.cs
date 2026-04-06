@@ -65,7 +65,7 @@ public class Mutation()
                          : guess.Generation < daily.Generation ? Hint.Higher
                          : Hint.Lower,
             Habitat = guess.HabitatId == daily.HabitatId ? Hint.Correct : Hint.Wrong,
-            Color = guess.ColorId == daily.ColorId ? Hint.Correct : Hint.Wrong,
+            Color = new ColorResult { ColorName = guess.Color!.Name, Hint = guess.ColorId == daily.ColorId ? Hint.Correct : Hint.Wrong },
             Types = new TypeHintResult { Slot1 = GetSlotHint(0), Slot2 = GetSlotHint(1) },
             IsCorrect = guess.Id == daily.Id
         };
