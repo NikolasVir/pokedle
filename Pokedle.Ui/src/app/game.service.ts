@@ -25,6 +25,7 @@ export class GameService {
         if (response.data.guess.isCorrect) {
           this.isWon.set(true);
         }
+        console.log('Guesses so far:', this.guesses());
       },
       error: (err) => console.error('Error fetching daily Pokémon:', err),
     });

@@ -1,0 +1,18 @@
+<div class="search-container">
+  <input
+    [(ngModel)]="searchText"
+    (input)="onSearch()"
+    placeholder="Search for a Pokémon..."
+    autocomplete="off"
+    class="pokemon-textbox"
+  />
+  @if (showDropdown()) {
+    <ul class="dropdown">
+      @for (pokemon of searchResults(); track pokemon.name) {
+        <li (click)="onSelect(pokemon.name)">
+          {{ pokemon.name }}
+        </li>
+      }
+    </ul>
+  }
+</div>

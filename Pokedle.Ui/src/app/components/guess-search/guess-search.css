@@ -1,0 +1,48 @@
+div {
+  width: 40vmin;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+}
+
+.pokemon-textbox {
+  max-width: 50vmin;
+  min-height: 8vmin;
+  padding: 1vmin 2vmin;
+  margin: 2vmin auto;
+  text-align: center;
+  background-color: #2a4280;
+
+  /* The Border Stack (Inner to Outer) */
+  border-radius: 8px;
+  box-shadow:
+    0 0 0 2px #505050,
+    /* Inner dark line */ 0 0 0 6px #f8a870,
+    /* Main orange/tan frame */ 0 0 0 8px #505050; /* Outer dark outline */
+}
+
+.dropdown {
+  width: 40vmin;
+  margin-left: auto;
+  margin-right: auto;
+  list-style: none;
+  background-color: #2a4280;
+  border-radius: 8px;
+  box-shadow:
+    0 0 0 2px #505050,
+    0 0 0 6px #f8a870,
+    0 0 0 8px #505050;
+  overflow: hidden;
+}
+
+.dropdown li {
+  padding: 1vmin 2vmin;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.dropdown li:hover {
+  background-color: #f8a870;
+  color: #2a4280;
+  box-shadow: inset 0 0 0 2px #505050;
+}
