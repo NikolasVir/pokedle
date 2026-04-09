@@ -9,7 +9,7 @@ public class Query
 {
 
     [Authorize]
-    public async Task<Pokemon> RevealDailyPokemon([Service] PokedleContext context)
+    public async Task<Pokemon> GetDailyPokemon([Service] PokedleContext context)
     {
         var today = DateOnly.FromDateTime(DateTime.UtcNow);
         var index = today.DayNumber % await context.Pokemons.CountAsync(p => p.Id < 10000);
@@ -35,18 +35,4 @@ public class Query
             .Include(p => p.PokemonElementTypes)
                 .ThenInclude(pet => pet.ElementType)
             .OrderBy(p => p.Id);
-
-    public async Task<int> GetDailyPokemonId([Service] PokedleContext context)
-    {
-        var today = DateOnly.FromDateTime(DateTime.UtcNow);
-        var seed = today.DayNumber;
-        var count = await context.Pokemons.CountAsync(p => p.Id < 10000);
-        var index = seed % count;
-        return await context.Pokemons
-            .Where(p => p.Id < 10000)
-            .OrderBy(p => p.Id)
-            .Skip(index)
-            .Select(p => p.Id)
-            .FirstAsync();
-    }
 }
