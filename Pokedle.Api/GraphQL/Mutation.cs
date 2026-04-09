@@ -1,11 +1,38 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 using HotChocolate.Subscriptions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Pokedle.Api.GraphQL.Types;
 using Pokedle.Api.Infrastructure;
+
 
 namespace Pokedle.Api.GraphQL;
 
 public class Mutation()
 {
+
+    public LoginResult Login(
+        string username,
+        string password,
+        IConfiguration configuration)
+    {
+        if (username != "ash" || password != "pikachu")
+            throw new GraphQLException("Invalid credentials.");
+
+        var key = configuration["Jwt:Key"]!;
+        var token = new JwtSecurityTokenHandler().WriteToken(
+            new JwtSecurityToken(
+                claims: [new Claim(ClaimTypes.Name, username)],
+                expires: DateTime.UtcNow.AddHours(1),
+                signingCredentials: new SigningCredentials(
+                    new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key)),
+                    SecurityAlgorithms.HmacSha256)
+            ));
+
+        return new LoginResult(token);
+    }
     public async Task<GuessResult> Guess(string pokemonName,
      [Service] PokedleContext context,
       [Service] ILogger<Mutation> logger,

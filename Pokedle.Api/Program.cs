@@ -4,6 +4,9 @@ using PokeApiNet;
 using Pokedle.Api.Infrastructure.Seeding;
 using Pokedle.Api.GraphQL;
 using Serilog;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 
 try
@@ -13,12 +16,25 @@ try
     var connectionString = builder.Configuration.GetConnectionString("Default")
         ?? throw new InvalidOperationException("Connection string 'Default' not found.");
 
+    var jwtKey = builder.Configuration["Jwt:Key"]
+        ?? throw new InvalidOperationException("JWT key not configured.");
 
     Log.Logger = new LoggerConfiguration()
         .ReadFrom.Configuration(builder.Configuration)
         .CreateLogger();
 
     builder.Services.AddSerilog(Log.Logger);
+
+    builder.Services
+        .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        .AddJwtBearer(o => o.TokenValidationParameters = new()
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+            ValidateIssuer = false,
+            ValidateAudience = false
+        });
+    builder.Services.AddAuthorization();
 
     builder.Services.AddDbContext<PokedleContext>(options =>
         options.UseNpgsql(connectionString)
@@ -28,6 +44,7 @@ try
     builder.Services.AddScoped<PokeApiSeeder>();
     builder.Services
         .AddGraphQLServer()
+        .AddAuthorization()
         .AddInMemorySubscriptions()
         .AddQueryType<Query>()
         .AddMutationType<Mutation>()
@@ -51,6 +68,9 @@ try
     var app = builder.Build();
 
     app.UseCors("AllowFrontend");
+
+    app.UseAuthentication();
+    app.UseAuthorization();
 
     app.UseSerilogRequestLogging();
 
