@@ -28,8 +28,10 @@ try
     builder.Services.AddScoped<PokeApiSeeder>();
     builder.Services
         .AddGraphQLServer()
+        .AddInMemorySubscriptions()
         .AddQueryType<Query>()
         .AddMutationType<Mutation>()
+        .AddSubscriptionType<Subscription>()
         .AddFiltering()
         .AddSorting();
 

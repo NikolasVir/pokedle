@@ -1,3 +1,4 @@
+using HotChocolate.Subscriptions;
 using Microsoft.EntityFrameworkCore;
 using Pokedle.Api.Infrastructure;
 
@@ -5,7 +6,10 @@ namespace Pokedle.Api.GraphQL;
 
 public class Mutation()
 {
-    public async Task<GuessResult> Guess(string pokemonName, [Service] PokedleContext context, [Service] ILogger<Mutation> logger)
+    public async Task<GuessResult> Guess(string pokemonName,
+     [Service] PokedleContext context,
+      [Service] ILogger<Mutation> logger,
+      [Service] ITopicEventSender sender)
     {
         var today = DateOnly.FromDateTime(DateTime.UtcNow);
         var seed = today.DayNumber;
@@ -76,6 +80,8 @@ public class Mutation()
             daily.Id,
             result
         );
+
+        await sender.SendAsync(nameof(Subscription.OnGuessMade), guess.Name);
 
         return result;
     }
