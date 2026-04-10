@@ -34,10 +34,7 @@ export class PokemonService {
       const unsubscribe = this.wsClient.subscribe(
         { query: DAILY_POKEMON_SUBSCRIPTION },
         {
-          next: (data: any) => {
-            subscriber.next(data.data?.onGuessMade);
-            console.log('Received subscription data:', data.data?.onGuessMade);
-          },
+          next: (data: any) => subscriber.next(data.data?.onGuessMade),
           error: (err) => subscriber.error(err),
           complete: () => subscriber.complete(),
         },
