@@ -74,6 +74,7 @@ try
 
     app.UseSerilogRequestLogging();
 
+    app.UseWebSockets();
     app.MapGraphQL();
 
     if (args.Contains("--seed"))
