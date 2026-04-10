@@ -8,7 +8,7 @@ type ViewState = 'hidden' | 'form' | 'result';
 
 @Component({
   selector: 'app-reveal-panel',
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule],
   templateUrl: './reveal-panel.html',
   styleUrl: './reveal-panel.css',
 })
