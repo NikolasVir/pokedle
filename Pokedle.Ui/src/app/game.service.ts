@@ -1,23 +1,29 @@
-import { inject, Injectable, signal } from '@angular/core';
+import { inject, Injectable, OnDestroy, signal } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { PokemonService } from './pokemon.service';
 
 @Injectable({
   providedIn: 'root',
 })
-export class GameService {
+export class GameService implements OnDestroy {
   private pokemonService = inject(PokemonService);
+  private guessSub: Subscription;
 
   guesses = signal<Array<any>>([]);
   recentGuesses = signal<string[]>([]);
   isWon = signal<boolean>(false);
 
   constructor() {
-    this.pokemonService.subscribeToGuesses().subscribe({
+    this.guessSub = this.pokemonService.subscribeToGuesses().subscribe({
       next: (name: string) => {
         this.recentGuesses.update((current) => [name, ...current]);
       },
       error: (err) => console.error('Subscription error:', err),
     });
+  }
+
+  ngOnDestroy() {
+    this.guessSub.unsubscribe();
   }
 
   submitGuess(pokemonName: string) {
