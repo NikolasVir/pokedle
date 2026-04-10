@@ -1,0 +1,40 @@
+@switch (viewState()) {
+  @case ('hidden') {
+    <button class="reveal-btn" (click)="showForm()">🔍 Reveal Today's Pokémon</button>
+  }
+  @case ('form') {
+    <div class="reveal-box">
+      <h3>Admin Login</h3>
+      <input
+        type="text"
+        placeholder="Username"
+        [value]="username()"
+        (input)="username.set($any($event.target).value)"
+      />
+      <input
+        type="password"
+        placeholder="Password"
+        [value]="password()"
+        (input)="password.set($any($event.target).value)"
+      />
+      @if (error()) {
+        <p class="error">{{ error() }}</p>
+      }
+      <button class="submit-btn" (click)="submit()">Login</button>
+    </div>
+  }
+  @case ('result') {
+    <div class="reveal-box">
+      <h3>Today's Pokémon</h3>
+      <p class="pokemon-name">{{ dailyPokemon()?.name }}</p>
+      <p>Gen {{ dailyPokemon()?.generation }}</p>
+      <p>{{ dailyPokemon()?.color?.name }}</p>
+      <p>
+        {{ dailyPokemon()?.pokemonElementTypes[0]?.elementType?.name }}
+        @if (dailyPokemon()?.pokemonElementTypes[1]) {
+          · {{ dailyPokemon()?.pokemonElementTypes[1]?.elementType?.name }}
+        }
+      </p>
+    </div>
+  }
+}

@@ -16,3 +16,11 @@ export const GUESS_MUTATION = (pokemonName: string) => `
     }
   }
 `;
+
+export const LOGIN_MUTATION = (username: string, password: string) => `
+  mutation {
+    login(username: "${username}", password: "${password}") {
+      token
+    }
+  }
+`;

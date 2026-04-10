@@ -4,10 +4,11 @@ import { GuessMessage } from './components/guess-message/guess-message';
 import { GuessSearch } from './components/guess-search/guess-search';
 import { GuessList } from './components/guess-list/guess-list';
 import { RecentGuessesFeed } from './components/recent-guesses-feed/recent-guesses-feed';
+import { RevealPanel } from './components/reveal-panel/reveal-panel';
 
 @Component({
   selector: 'app-root',
-  imports: [Header, GuessMessage, GuessSearch, GuessList, RecentGuessesFeed],
+  imports: [Header, GuessMessage, GuessSearch, GuessList, RecentGuessesFeed, RevealPanel],
   templateUrl: './app.html',
   styleUrl: './app.css',
 })
