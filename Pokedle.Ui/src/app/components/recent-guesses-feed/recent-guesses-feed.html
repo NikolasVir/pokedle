@@ -1,0 +1,9 @@
+<div class="feed-box">
+  <h3>Recent Guesses</h3>
+  @if (gameService.recentGuesses().length === 0) {
+    <p class="empty">No guesses yet...</p>
+  }
+  @for (name of gameService.recentGuesses(); track name) {
+    <div class="feed-item">{{ name }}</div>
+  }
+</div>

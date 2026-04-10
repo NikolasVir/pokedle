@@ -7,14 +7,16 @@ import { PokemonService } from './pokemon.service';
 export class GameService {
   private pokemonService = inject(PokemonService);
 
-  dailyPokemonId = signal<number>(0);
   guesses = signal<Array<any>>([]);
+  recentGuesses = signal<string[]>([]);
   isWon = signal<boolean>(false);
 
   constructor() {
-    this.pokemonService.getDailyPokemonId().subscribe({
-      next: (response: any) => this.dailyPokemonId.set(response.data.dailyPokemonId),
-      error: (err) => console.error('Error fetching daily Pokémon:', err),
+    this.pokemonService.subscribeToGuesses().subscribe({
+      next: (name: string) => {
+        this.recentGuesses.update((current) => [name, ...current]);
+      },
+      error: (err) => console.error('Subscription error:', err),
     });
   }
 
@@ -25,9 +27,8 @@ export class GameService {
         if (response.data.guess.isCorrect) {
           this.isWon.set(true);
         }
-        console.log('Guesses so far:', this.guesses());
       },
-      error: (err) => console.error('Error fetching daily Pokémon:', err),
+      error: (err) => console.error('Error submitting guess:', err),
     });
   }
 }

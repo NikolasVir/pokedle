@@ -1,0 +1,36 @@
+.feed-box {
+  display: flex;
+  flex-direction: column;
+  gap: 1vmin;
+  padding: 2vmin;
+  background-color: #1a2f60;
+  border-radius: 8px;
+  box-shadow:
+    0 0 0 2px #505050,
+    0 0 0 6px #ffcb05,
+    0 0 0 8px #505050;
+  max-height: 80vh;
+  overflow-y: auto;
+  min-width: 200px;
+}
+
+h3 {
+  text-align: center;
+  color: #ffcb05;
+  margin: 0 0 1vmin 0;
+}
+
+.feed-item {
+  padding: 1vmin 2vmin;
+  background-color: #2a4280;
+  border-radius: 6px;
+  text-align: center;
+  text-transform: capitalize;
+  color: white;
+}
+
+.empty {
+  color: #aaa;
+  text-align: center;
+  font-style: italic;
+}
