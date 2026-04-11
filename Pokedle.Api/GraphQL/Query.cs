@@ -2,6 +2,7 @@ using HotChocolate.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Pokedle.Api.Domain;
 using Pokedle.Api.Infrastructure;
+using Pokedle.Api.Services;
 
 namespace Pokedle.Api.GraphQL;
 
@@ -9,20 +10,9 @@ public class Query
 {
 
     [Authorize]
-    public async Task<Pokemon> GetDailyPokemon([Service] PokedleContext context)
+    public async Task<Pokemon> GetDailyPokemon([Service] DailyPokemonService dailyPokemonService)
     {
-        var today = DateOnly.FromDateTime(DateTime.UtcNow);
-        var index = today.DayNumber % await context.Pokemons.CountAsync(p => p.Id < 10000);
-
-        return await context.Pokemons
-            .Where(p => p.Id < 10000)
-            .OrderBy(p => p.Id)
-            .Skip(index)
-            .Include(p => p.Habitat)
-            .Include(p => p.Color)
-            .Include(p => p.PokemonElementTypes)
-                .ThenInclude(pet => pet.ElementType)
-            .FirstAsync();
+        return await dailyPokemonService.GetDailyPokemonAsync();
     }
 
     [UseFiltering]

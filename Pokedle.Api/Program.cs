@@ -42,6 +42,8 @@ try
 
     builder.Services.AddSingleton<PokeApiClient>();
     builder.Services.AddScoped<PokeApiSeeder>();
+    builder.Services.AddScoped<DailyPokemonService>();
+
     builder.Services
         .AddGraphQLServer()
         .AddAuthorization()

@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Pokedle.Api.GraphQL.Types;
 using Pokedle.Api.Infrastructure;
+using Pokedle.Api.Services;
 
 
 namespace Pokedle.Api.GraphQL;
@@ -33,25 +34,14 @@ public class Mutation()
 
         return new LoginResult(token);
     }
-    public async Task<GuessResult> Guess(string pokemonName,
-     [Service] PokedleContext context,
-      [Service] ILogger<Mutation> logger,
-      [Service] ITopicEventSender sender)
-    {
-        var today = DateOnly.FromDateTime(DateTime.UtcNow);
-        var seed = today.DayNumber;
-        var count = await context.Pokemons.CountAsync(p => p.Id < 10000);
-        var index = seed % count;
 
-        var daily = await context.Pokemons
-            .Where(p => p.Id < 10000)
-            .OrderBy(p => p.Id)
-            .Skip(index)
-            .Include(p => p.Habitat)
-            .Include(p => p.Color)
-            .Include(p => p.PokemonElementTypes)
-                .ThenInclude(pet => pet.ElementType)
-            .FirstAsync();
+    public async Task<GuessResult> Guess(string pokemonName,
+        [Service] DailyPokemonService dailyPokemonService,
+        [Service] PokedleContext context,
+        [Service] ILogger<Mutation> logger,
+        [Service] ITopicEventSender sender)
+    {
+        var daily = await dailyPokemonService.GetDailyPokemonAsync();
 
         var guess = await context.Pokemons
             .Where(p => p.Name == pokemonName.ToLower())
