@@ -100,6 +100,7 @@ public class PokeApiSeeder(PokedleContext context, PokeApiClient pokeApi, ILogge
         return FindStage(chain.Chain, species.Name, 1);
     }
 
+    // Recursively walks the evolution chain tree to find the stage depth of the given species
     private static int FindStage(ChainLink link, string name, int stage)
     {
         if (link.Species.Name == name) return stage;

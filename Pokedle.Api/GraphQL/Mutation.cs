@@ -63,6 +63,7 @@ public class Mutation()
         while (guessTypes.Count < 2) guessTypes.Add((null, "none"));
         while (dailyTypeIds.Count < 2) dailyTypeIds.Add(null);
 
+        // Returns Correct if type matches same slot, Partial if type exists in a different slot, Wrong otherwise
         TypeSlotHint GetSlotHint(int slot)
         {
             var (typeId, typeName) = guessTypes[slot];

@@ -7,6 +7,11 @@ using Serilog;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Pokedle.Api.Services;
+
+//TODO:
+//
+// fix no single character search working
 
 
 try
