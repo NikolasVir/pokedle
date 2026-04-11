@@ -22,20 +22,28 @@ export class RevealPanel {
   dailyPokemon = signal<any>(null);
 
   showForm() {
-    this.viewState.set('form');
+    if (this.authService.isLoggedIn()) {
+      this.fetchDailyPokemon();
+    } else {
+      this.viewState.set('form');
+    }
+  }
+
+  fetchDailyPokemon() {
+    this.pokemonService.getDailyPokemon(this.authService.token()!).subscribe({
+      next: (response: any) => {
+        this.dailyPokemon.set(response.data?.dailyPokemon);
+        this.viewState.set('result');
+      },
+      error: () => this.error.set('Failed to fetch daily Pokémon.'),
+    });
   }
 
   async submit() {
     this.error.set(null);
     try {
       await this.authService.login(this.username(), this.password());
-      this.pokemonService.getDailyPokemon(this.authService.token()!).subscribe({
-        next: (response: any) => {
-          this.dailyPokemon.set(response.data?.dailyPokemon);
-          this.viewState.set('result');
-        },
-        error: () => this.error.set('Failed to fetch daily Pokémon.'),
-      });
+      this.fetchDailyPokemon();
     } catch (err: any) {
       this.error.set(typeof err === 'string' ? err : 'Invalid credentials.');
     }
