@@ -32,7 +32,7 @@ public class PokeApiSeeder(PokedleContext context, PokeApiClient pokeApi, ILogge
 
             var color = await GetOrCreateColor(species.Color.Name);
             var evoStage = await GetEvolutionStage(species);
-            var generation = GetGeneration(apiPokemon.Id);
+            var generation = GetGeneration(species);
 
             var pokemon = new Pokemon
             {
@@ -112,16 +112,9 @@ public class PokeApiSeeder(PokedleContext context, PokeApiClient pokeApi, ILogge
         return -1; // not found
     }
 
-    private static int GetGeneration(int pokemonId) => pokemonId switch
+    private static int GetGeneration(PokemonSpecies species)
     {
-        <= 151 => 1,
-        <= 251 => 2,
-        <= 386 => 3,
-        <= 493 => 4,
-        <= 649 => 5,
-        <= 721 => 6,
-        <= 809 => 7,
-        <= 905 => 8,
-        _ => 9
-    };
+        var url = species.Generation.Url.TrimEnd('/');
+        return int.Parse(url.Split('/').Last());
+    }
 }
