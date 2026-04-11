@@ -32,6 +32,16 @@ export class RevealPanel {
   fetchDailyPokemon() {
     this.pokemonService.getDailyPokemon(this.authService.token()!).subscribe({
       next: (response: any) => {
+        const authError = response.errors?.find(
+          (e: any) => e.extensions?.code === 'AUTH_NOT_AUTHENTICATED',
+        );
+
+        if (authError) {
+          this.authService.logout();
+          this.viewState.set('form');
+          return;
+        }
+
         this.dailyPokemon.set(response.data?.dailyPokemon);
         this.viewState.set('result');
       },
