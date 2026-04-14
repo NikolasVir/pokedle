@@ -19,7 +19,7 @@ public class Query
     [UseSorting]
     public IQueryable<Pokemon> GetAllPokemon([Service] PokedleContext context) =>
         context.Pokemons
-            .Where(p => p.Id < 10000)
+            .Where(p => p.Id < PokedleContext.MaxBasePokemonId)
             .Include(p => p.Habitat)
             .Include(p => p.Color)
             .Include(p => p.PokemonElementTypes)

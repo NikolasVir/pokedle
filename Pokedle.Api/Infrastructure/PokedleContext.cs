@@ -7,6 +7,9 @@ namespace Pokedle.Api.Infrastructure;
 public class PokedleContext(DbContextOptions<PokedleContext> options)
     : DbContext(options)
 {
+    // Exclude alternate forms and regional variants (IDs >= 10000)
+    public const int MaxBasePokemonId = 10000;
+
     public DbSet<Pokemon> Pokemons { get; set; }
     public DbSet<Habitat> Habitats { get; set; }
     public DbSet<PokemonColor> Colors { get; set; }

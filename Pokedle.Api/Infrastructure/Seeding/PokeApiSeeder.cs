@@ -18,7 +18,7 @@ public class PokeApiSeeder(PokedleContext context, PokeApiClient pokeApi, ILogge
 
         logger.LogInformation("Fetching all pokemon from PokeAPI");
 
-        var page = await pokeApi.GetNamedResourcePageAsync<PokeApiNet.Pokemon>(limit: 10000, offset: 0);
+        var page = await pokeApi.GetNamedResourcePageAsync<PokeApiNet.Pokemon>(limit: PokedleContext.MaxBasePokemonId, offset: 0);
 
         foreach (var resource in page.Results)
         {

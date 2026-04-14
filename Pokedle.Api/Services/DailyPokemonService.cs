@@ -9,8 +9,7 @@ public class DailyPokemonService(PokedleContext context)
 
     public async Task<Pokemon> GetDailyPokemonAsync()
     {
-        // Exclude alternate forms and regional variants (IDs >= 10000)
-        var pokemonCount = await context.Pokemons.CountAsync(p => p.Id < 10000);
+        var pokemonCount = await context.Pokemons.CountAsync(p => p.Id < PokedleContext.MaxBasePokemonId);
         // Seed with today's date so the same Pokémon is returned for the entire day
         var seed = DateOnly.FromDateTime(DateTime.UtcNow).DayNumber;
         var rng = new Random(seed);
