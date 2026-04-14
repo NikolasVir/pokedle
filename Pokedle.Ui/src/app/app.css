@@ -3,6 +3,7 @@
   min-height: 100vh;
   background-image: url('/background.png');
   background-size: cover;
+  background-attachment: fixed;
   display: flex;
   flex-direction: row;
   align-items: flex-start;
