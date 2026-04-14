@@ -43,7 +43,7 @@ export class GuessSearch implements OnInit, OnDestroy {
   }
 
   onSearch() {
-    if (this.searchText.length < 2) {
+    if (this.searchText.length < 1) {
       this.showDropdown.set(false);
       return;
     }
