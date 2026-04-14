@@ -19,6 +19,7 @@ public class Mutation()
         string password,
         IConfiguration configuration)
     {
+        // Demo only: a real implementation would use a Users table with hashed passwords.
         if (username != "ash" || password != "pikachu")
             throw new GraphQLException("Invalid credentials.");
 
