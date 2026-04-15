@@ -9,11 +9,6 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Pokedle.Api.Services;
 
-//TODO:
-//
-// fix no single character search working
-
-
 try
 {
     var builder = WebApplication.CreateBuilder(args);
