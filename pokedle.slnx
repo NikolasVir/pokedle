@@ -1,3 +1,4 @@
 <Solution>
+  <Project Path="Pokedle.Api.Tests/Pokedle.Api.Tests.csproj" />
   <Project Path="Pokedle.Api/Pokedle.Api.csproj" />
 </Solution>

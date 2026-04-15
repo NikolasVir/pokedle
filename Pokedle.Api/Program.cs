@@ -13,6 +13,8 @@ try
 {
     var builder = WebApplication.CreateBuilder(args);
 
+    var isTesting = builder.Environment.IsEnvironment("Testing");
+
     var connectionString = builder.Configuration.GetConnectionString("Default")
         ?? throw new InvalidOperationException("Connection string 'Default' not found.");
 
@@ -34,11 +36,20 @@ try
             ValidateIssuer = false,
             ValidateAudience = false
         });
+
     builder.Services.AddAuthorization();
 
-    builder.Services.AddDbContext<PokedleContext>(options =>
-        options.UseNpgsql(connectionString)
-               .UseSnakeCaseNamingConvention());
+    if (isTesting)
+    {
+        builder.Services.AddDbContext<PokedleContext>(options =>
+            options.UseInMemoryDatabase("InMemoryTest"));
+    }
+    else
+    {
+        builder.Services.AddDbContext<PokedleContext>(options =>
+            options.UseNpgsql(connectionString)
+                   .UseSnakeCaseNamingConvention());
+    }
 
     builder.Services.AddSingleton<PokeApiClient>();
     builder.Services.AddScoped<PokeApiSeeder>();
@@ -97,3 +108,5 @@ finally
 {
     await Log.CloseAndFlushAsync();
 }
+
+public partial class Program { }
