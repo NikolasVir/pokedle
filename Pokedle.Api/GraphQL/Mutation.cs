@@ -11,9 +11,11 @@ using Pokedle.Api.Services;
 
 namespace Pokedle.Api.GraphQL;
 
+/// <summary>GraphQL mutations for login and guessing.</summary>
 public class Mutation()
 {
 
+    /// <summary>Authenticate and return a JWT.</summary>
     public LoginResult Login(
         string username,
         string password,
@@ -36,6 +38,7 @@ public class Mutation()
         return new LoginResult(token);
     }
 
+    /// <summary>Submit a guess for the daily Pokémon.</summary>
     public async Task<GuessResult> Guess(string pokemonName,
         [Service] DailyPokemonService dailyPokemonService,
         [Service] PokedleContext context,

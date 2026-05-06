@@ -6,8 +6,10 @@ using PokemonColor = Pokedle.Api.Domain.PokemonColor;
 
 namespace Pokedle.Api.Infrastructure.Seeding;
 
+/// <summary>Seeds the database with Pokémon data from PokéAPI.</summary>
 public class PokeApiSeeder(PokedleContext context, PokeApiClient pokeApi, ILogger<PokeApiSeeder> logger)
 {
+    /// <summary>Fetches all base-form Pokémon and populates the database.</summary>
     public async Task SeedAsync()
     {
         if (await context.Pokemons.AnyAsync())

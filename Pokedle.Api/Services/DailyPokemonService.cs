@@ -4,9 +4,11 @@ using Pokedle.Api.Infrastructure;
 
 namespace Pokedle.Api.Services;
 
+/// <summary>Determines the daily Pokémon based on the current date.</summary>
 public class DailyPokemonService(PokedleContext context)
 {
 
+    /// <summary>Returns the Pokémon of the day seeded by UTC date.</summary>
     public async Task<Pokemon> GetDailyPokemonAsync()
     {
         var pokemonCount = await context.Pokemons.CountAsync(p => p.Id < PokedleContext.MaxBasePokemonId);

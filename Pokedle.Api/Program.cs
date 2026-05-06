@@ -109,4 +109,5 @@ finally
     await Log.CloseAndFlushAsync();
 }
 
+/// <summary>Entry point — declared partial for WebApplicationFactory in tests.</summary>
 public partial class Program { }

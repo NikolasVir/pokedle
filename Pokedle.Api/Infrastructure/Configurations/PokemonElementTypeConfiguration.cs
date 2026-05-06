@@ -4,8 +4,10 @@ using Pokedle.Api.Domain;
 
 namespace Pokedle.Api.Infrastructure.Configurations;
 
+/// <summary>EF Core configuration for the PokemonElementType join entity.</summary>
 public class PokemonElementTypeConfiguration : IEntityTypeConfiguration<PokemonElementType>
 {
+    /// <summary>Configures relationships, keys, and unique index.</summary>
     public void Configure(EntityTypeBuilder<PokemonElementType> builder)
     {
         builder.HasKey(pet => pet.Id);
