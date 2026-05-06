@@ -98,7 +98,7 @@ try
         return;
     }
 
-    app.Run();
+    app.RunWithGraphQLCommands(args);
 }
 catch (Exception ex)
 {
