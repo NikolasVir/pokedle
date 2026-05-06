@@ -1,0 +1,13 @@
+spectaql:
+  displayAllServers: false
+
+info:
+  title: Pokedle GraphQL API
+  description: GraphQL API for the Pokedle guessing game.
+
+servers:
+  - url: http://localhost:5065/graphql
+    description: Local
+
+introspection:
+  schemaFile: ./Pokedle.Api/schema.graphql
