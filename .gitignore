@@ -53,3 +53,12 @@ appsettings.Development.json
 # Logs folder
 
 logs
+
+# DocFX
+
+_site
+api
+
+# AI
+
+AGENTS.md

@@ -1,0 +1,15 @@
+{
+  "metadata": [
+    {
+      "src": [{ "files": ["Pokedle.Api/**/*.csproj"] }],
+      "dest": "api"
+    }
+  ],
+  "build": {
+    "content": [
+      { "files": ["api/**.yml", "api/index.md"] },
+      { "files": ["docs/**.md", "docs/toc.yml", "toc.yml", "*.md"] }
+    ],
+    "dest": "_site"
+  }
+}
