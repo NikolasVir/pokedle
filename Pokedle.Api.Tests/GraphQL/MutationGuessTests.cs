@@ -21,9 +21,7 @@ public class MutationGuessTests
 
     public MutationGuessTests()
     {
-        _fixture = new Fixture().Customize(
-            new AutoNSubstituteCustomization { ConfigureMembers = true }
-        );
+        _fixture = TestHelpers.CreateFixture();
         _sender = Substitute.For<ITopicEventSender>();
         _logger = Substitute.For<ILogger<Mutation>>();
     }
@@ -33,27 +31,97 @@ public class MutationGuessTests
     // ---------------------------------------------------------------
 
     /// <summary>
-    /// Creates a fresh InMemory context pre-seeded with the two given Pokémon
-    /// (daily is only added when it differs from guess).
+    /// Builds a (daily, guess) pair using AutoFixture for all string/numeric data.
+    /// Use sameId=true to simulate a correct guess.
     /// </summary>
-    private static PokedleContext BuildContext(string dbName, Pokemon daily, Pokemon guess)
+    private (Pokemon daily, Pokemon guess) BuildPair(
+        bool sameGeneration = true,
+        bool sameHabitat = true,
+        bool sameColor = true,
+        bool sameId = false
+    )
+    {
+        var elementType = new ElementType { Id = 1, Name = _fixture.Create<string>() };
+
+        var daily = _fixture
+            .Build<Pokemon>()
+            .With(p => p.Id, 4)
+            .With(p => p.Name, _fixture.Create<string>().ToLower())
+            .With(p => p.Generation, 1)
+            .With(p => p.EvolutionStage, 1)
+            .With(p => p.HabitatId, 2)
+            .With(p => p.Habitat, new Habitat { Id = 2, Name = _fixture.Create<string>() })
+            .With(p => p.ColorId, 3)
+            .With(p => p.Color, new PokemonColor { Id = 3, Name = _fixture.Create<string>() })
+            .With(
+                p => p.PokemonElementTypes,
+                new List<PokemonElementType>
+                {
+                    new()
+                    {
+                        PokemonId = 4,
+                        ElementTypeId = 1,
+                        ElementType = elementType,
+                    },
+                }
+            )
+            .Create();
+
+        var guessId = sameId ? 4 : 25;
+        var guess = _fixture
+            .Build<Pokemon>()
+            .With(p => p.Id, guessId)
+            .With(p => p.Name, sameId ? daily.Name : _fixture.Create<string>().ToLower())
+            .With(p => p.Generation, sameGeneration ? daily.Generation : daily.Generation + 1)
+            .With(p => p.EvolutionStage, 1)
+            .With(p => p.HabitatId, sameHabitat ? 2 : 99)
+            .With(
+                p => p.Habitat,
+                sameHabitat
+                    ? new Habitat { Id = 2, Name = daily.Habitat!.Name }
+                    : new Habitat { Id = 99, Name = _fixture.Create<string>() }
+            )
+            .With(p => p.ColorId, sameColor ? 3 : 10)
+            .With(
+                p => p.Color,
+                sameColor
+                    ? new PokemonColor { Id = 3, Name = daily.Color!.Name }
+                    : new PokemonColor { Id = 10, Name = _fixture.Create<string>() }
+            )
+            .With(
+                p => p.PokemonElementTypes,
+                new List<PokemonElementType>
+                {
+                    new()
+                    {
+                        PokemonId = guessId,
+                        ElementTypeId = 1,
+                        ElementType = elementType,
+                    },
+                }
+            )
+            .Create();
+
+        return (daily, guess);
+    }
+
+    /// <summary>
+    /// Builds the InMemory context seeded with the guessed Pokémon row.
+    /// </summary>
+    private static PokedleContext BuildGuessContext(string dbName, Pokemon daily, Pokemon guess)
     {
         var context = TestHelpers.CreateInMemoryContext(dbName);
 
-        // Always add the element type
         context.ElementTypes.Add(new ElementType { Id = 1, Name = "fire" });
 
-        // Habitats
         context.Habitats.Add(new Habitat { Id = guess.HabitatId, Name = guess.Habitat!.Name });
         if (daily.HabitatId != guess.HabitatId)
             context.Habitats.Add(new Habitat { Id = daily.HabitatId, Name = daily.Habitat!.Name });
 
-        // Colors
         context.Colors.Add(new PokemonColor { Id = guess.ColorId, Name = guess.Color!.Name });
         if (daily.ColorId != guess.ColorId)
             context.Colors.Add(new PokemonColor { Id = daily.ColorId, Name = daily.Color!.Name });
 
-        // The guessed Pokémon row (without nav props — EF resolves via FKs)
         context.Pokemons.Add(
             new Pokemon
             {
@@ -75,101 +143,21 @@ public class MutationGuessTests
     }
 
     /// <summary>
-    /// Builds a (daily, guess) pair. Use sameId=true to simulate a correct guess.
+    /// Builds the InMemory context for DailyPokemonService.
+    /// Seeded with exactly one Pokémon at Id=1 so rng.Next(1,1)
+    /// always resolves deterministically without requiring a virtual method.
     /// </summary>
-    private static (Pokemon daily, Pokemon guess) BuildPair(
-        bool sameGeneration = true,
-        bool sameHabitat = true,
-        bool sameColor = true,
-        bool sameId = false
-    )
+    private static PokedleContext BuildDailyContext(string dbName, Pokemon daily)
     {
-        var elementType = new ElementType { Id = 1, Name = "fire" };
+        var context = TestHelpers.CreateInMemoryContext(dbName);
 
-        var daily = new Pokemon
-        {
-            Id = 4,
-            Name = "charmander",
-            Generation = 1,
-            EvolutionStage = 1,
-            HabitatId = 2,
-            Habitat = new Habitat { Id = 2, Name = "mountain" },
-            ColorId = 3,
-            Color = new PokemonColor { Id = 3, Name = "red" },
-            PokemonElementTypes =
-            [
-                new PokemonElementType
-                {
-                    PokemonId = 4,
-                    ElementTypeId = 1,
-                    ElementType = elementType,
-                },
-            ],
-        };
-
-        var guess = new Pokemon
-        {
-            Id = sameId ? 4 : 25,
-            Name = sameId ? "charmander" : "pikachu",
-            Generation = sameGeneration ? 1 : 2,
-            EvolutionStage = 1,
-            HabitatId = sameHabitat ? 2 : 99,
-            Habitat = sameHabitat
-                ? new Habitat { Id = 2, Name = "mountain" }
-                : new Habitat { Id = 99, Name = "forest" },
-            ColorId = sameColor ? 3 : 10,
-            Color = sameColor
-                ? new PokemonColor { Id = 3, Name = "red" }
-                : new PokemonColor { Id = 10, Name = "yellow" },
-            PokemonElementTypes =
-            [
-                new PokemonElementType
-                {
-                    PokemonId = sameId ? 4 : 25,
-                    ElementTypeId = 1,
-                    ElementType = elementType,
-                },
-            ],
-        };
-
-        return (daily, guess);
-    }
-
-    /// <summary>
-    /// Runs Mutation.Guess end-to-end using a real InMemory DailyPokemonService
-    /// that is pre-loaded to return <paramref name="daily"/>.
-    /// </summary>
-    private async Task<GuessResult> RunGuess(Pokemon daily, Pokemon guess)
-    {
-        var dbName = $"guess-{Guid.NewGuid()}";
-        var context = BuildContext(dbName, daily, guess);
-
-        // Use InMemory context for DailyPokemonService too, but seed it
-        // so the deterministic random picks the correct daily pokemon.
-        // Easier: use a second context instance pointing at the same DB
-        // and just create a substituted wrapper around the real service.
-        // We use a separate InMemory DB seeded only with the daily pokemon
-        // so GetDailyPokemonAsync always returns it.
-        var dailyDbName = $"daily-{Guid.NewGuid()}";
-        var dailyContext = TestHelpers.CreateInMemoryContext(dailyDbName);
-
-        dailyContext.ElementTypes.Add(new ElementType { Id = 1, Name = "fire" });
-        dailyContext.Habitats.Add(new Habitat { Id = daily.HabitatId, Name = daily.Habitat!.Name });
-        dailyContext.Colors.Add(new PokemonColor { Id = daily.ColorId, Name = daily.Color!.Name });
-
-        // Seed exactly 1 pokemon so index always == daily.Id
-        // The service picks: index = rng.Next(1, count) where count==1, so index is always 1
-        // We therefore need Id=1 for this seeding trick to work.
-        // Instead, we subclass/wrap using a partial NSubstitute spy on the real service:
-        // Simplest approach — NSubstitute the abstract method via a real instance partial mock.
-        // Because DailyPokemonService is NOT virtual/interface, we mock at the call site:
-        // create a substitute of an *interface* we extract — but we don't have one.
-        // Best solution: seed dailyContext with ONLY the daily pokemon at Id=1
-        // and adjust count so rng.Next(1,1)=1 always resolves Id=1.
-        dailyContext.Pokemons.Add(
+        context.ElementTypes.Add(new ElementType { Id = 1, Name = "fire" });
+        context.Habitats.Add(new Habitat { Id = daily.HabitatId, Name = daily.Habitat!.Name });
+        context.Colors.Add(new PokemonColor { Id = daily.ColorId, Name = daily.Color!.Name });
+        context.Pokemons.Add(
             new Pokemon
             {
-                Id = 1, // ← seed at Id=1 so rng always picks it
+                Id = 1,
                 Name = daily.Name,
                 Generation = daily.Generation,
                 EvolutionStage = daily.EvolutionStage,
@@ -178,12 +166,19 @@ public class MutationGuessTests
                 PokemonElementTypes = [new PokemonElementType { PokemonId = 1, ElementTypeId = 1 }],
             }
         );
-        dailyContext.SaveChanges();
 
+        context.SaveChanges();
+        return context;
+    }
+
+    private async Task<GuessResult> RunGuess(Pokemon daily, Pokemon guess)
+    {
+        var guessContext = BuildGuessContext($"guess-{Guid.NewGuid()}", daily, guess);
+        var dailyContext = BuildDailyContext($"daily-{Guid.NewGuid()}", daily);
         var dailyService = new DailyPokemonService(dailyContext);
 
         var sut = new Mutation();
-        return await sut.Guess(guess.Name, dailyService, context, _logger, _sender);
+        return await sut.Guess(guess.Name, dailyService, guessContext, _logger, _sender);
     }
 
     // ---------------------------------------------------------------
@@ -194,13 +189,9 @@ public class MutationGuessTests
     public async Task Guess_CorrectPokemon_IsCorrect_True()
     {
         var (daily, guess) = BuildPair(sameId: true);
-        // For IsCorrect we need the guessed pokemon to have the same Id as daily.
-        // RunGuess seeds the daily at Id=1 and the guess also at Id=4 in main context.
-        // So to make IsCorrect=true we need guess.Id == daily.Id inside the service.
-        // We override: make daily.Id=1 so it matches what the service returns.
+        // Daily context seeds at Id=1; align both to Id=1 for IsCorrect match
         daily.Id = 1;
         guess.Id = 1;
-        guess.Name = daily.Name;
 
         var result = await RunGuess(daily, guess);
 
@@ -228,7 +219,7 @@ public class MutationGuessTests
     [Fact]
     public async Task Guess_LowerGeneration_Returns_Higher_Hint()
     {
-        // guess.Generation(1) < daily.Generation(2) → Hint.Higher
+        // guess.Generation < daily.Generation → Hint.Higher (arrow points up)
         var (daily, guess) = BuildPair(sameGeneration: false);
         daily.Generation = 2;
         guess.Generation = 1;
@@ -241,7 +232,7 @@ public class MutationGuessTests
     [Fact]
     public async Task Guess_HigherGeneration_Returns_Lower_Hint()
     {
-        // guess.Generation(3) > daily.Generation(1) → Hint.Lower
+        // guess.Generation > daily.Generation → Hint.Lower (arrow points down)
         var (daily, guess) = BuildPair(sameGeneration: false);
         daily.Generation = 1;
         guess.Generation = 3;
@@ -313,7 +304,6 @@ public class MutationGuessTests
         var (daily, guess) = BuildPair();
         await RunGuess(daily, guess);
 
-        // NSubstitute: verify SendAsync was called at least once with any args
         await _sender
             .Received(1)
             .SendAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
@@ -323,33 +313,13 @@ public class MutationGuessTests
     public async Task Guess_Unknown_Pokemon_Throws_GraphQLException()
     {
         var (daily, _) = BuildPair();
-
-        // Build a context with the daily seeded, but do NOT add "unknownmon"
-        var dailyDbName = $"daily-{Guid.NewGuid()}";
-        var dailyCtx = TestHelpers.CreateInMemoryContext(dailyDbName);
-        dailyCtx.ElementTypes.Add(new ElementType { Id = 1, Name = "fire" });
-        dailyCtx.Habitats.Add(new Habitat { Id = daily.HabitatId, Name = daily.Habitat!.Name });
-        dailyCtx.Colors.Add(new PokemonColor { Id = daily.ColorId, Name = daily.Color!.Name });
-        dailyCtx.Pokemons.Add(
-            new Pokemon
-            {
-                Id = 1,
-                Name = daily.Name,
-                Generation = daily.Generation,
-                EvolutionStage = daily.EvolutionStage,
-                HabitatId = daily.HabitatId,
-                ColorId = daily.ColorId,
-                PokemonElementTypes = [new PokemonElementType { PokemonId = 1, ElementTypeId = 1 }],
-            }
-        );
-        dailyCtx.SaveChanges();
-
-        var emptyGuessCtx = TestHelpers.CreateInMemoryContext($"empty-{Guid.NewGuid()}");
-        var dailyService = new DailyPokemonService(dailyCtx);
+        var dailyContext = BuildDailyContext($"daily-{Guid.NewGuid()}", daily);
+        var emptyGuessContext = TestHelpers.CreateInMemoryContext($"empty-{Guid.NewGuid()}");
+        var dailyService = new DailyPokemonService(dailyContext);
         var sut = new Mutation();
 
         await Should.ThrowAsync<GraphQLException>(() =>
-            sut.Guess("unknownmon", dailyService, emptyGuessCtx, _logger, _sender)
+            sut.Guess("unknownmon", dailyService, emptyGuessContext, _logger, _sender)
         );
     }
 }

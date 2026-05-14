@@ -1,3 +1,4 @@
+using AutoFixture;
 using Pokedle.Api.Domain;
 using Pokedle.Api.Infrastructure;
 using Pokedle.Api.Services;
@@ -8,27 +9,23 @@ namespace Pokedle.Api.Tests.Services;
 
 public class DailyPokemonServiceTests
 {
+    private readonly IFixture _fixture = TestHelpers.CreateFixture();
+
     private PokedleContext BuildContext(string dbName)
     {
         var context = TestHelpers.CreateInMemoryContext(dbName);
 
-        // Seed supporting data
-        var habitat = new Habitat { Id = 1, Name = "grassland" };
-        var color = new PokemonColor { Id = 1, Name = "yellow" };
-        var elementType = new ElementType { Id = 1, Name = "electric" };
+        context.Habitats.Add(new Habitat { Id = 1, Name = _fixture.Create<string>() });
+        context.Colors.Add(new PokemonColor { Id = 1, Name = _fixture.Create<string>() });
+        context.ElementTypes.Add(new ElementType { Id = 1, Name = _fixture.Create<string>() });
 
-        context.Habitats.Add(habitat);
-        context.Colors.Add(color);
-        context.ElementTypes.Add(elementType);
-
-        // Seed multiple Pokémon so the random index always resolves
         for (int i = 1; i <= 10; i++)
         {
             context.Pokemons.Add(
                 new Pokemon
                 {
                     Id = i,
-                    Name = $"pokemon-{i}",
+                    Name = _fixture.Create<string>().ToLower(),
                     Generation = 1,
                     EvolutionStage = 1,
                     HabitatId = 1,
@@ -55,7 +52,7 @@ public class DailyPokemonServiceTests
         // Act
         var result = await sut.GetDailyPokemonAsync();
 
-        // Assert (Shouldly)
+        // Assert
         result.ShouldNotBeNull();
     }
 
@@ -73,7 +70,7 @@ public class DailyPokemonServiceTests
     [Fact]
     public async Task GetDailyPokemonAsync_Is_Deterministic_For_Same_Day()
     {
-        // Same seeded DB, same day → same result every call
+        // Same DB + same date seed → always returns the same Pokémon
         var context = BuildContext(nameof(GetDailyPokemonAsync_Is_Deterministic_For_Same_Day));
         var sut = new DailyPokemonService(context);
 
@@ -124,7 +121,7 @@ public class DailyPokemonServiceTests
     [Fact]
     public async Task GetDailyPokemonAsync_Throws_When_No_Pokemon_In_Db()
     {
-        // Empty DB → should throw
+        // Empty DB → service must throw
         var context = TestHelpers.CreateInMemoryContext(
             nameof(GetDailyPokemonAsync_Throws_When_No_Pokemon_In_Db)
         );
