@@ -2,10 +2,10 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
-using Xunit;
 using Pokedle.Api.Infrastructure;
+using Shouldly;
+using Xunit;
 
 namespace Pokedle.Api.Tests;
 
@@ -33,7 +33,7 @@ public class PokemonIntegrationTests : IClassFixture<CustomWebApplicationFactory
 
         using var scope = _factory.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<PokedleContext>();
-        context.Pokemons.Should().Contain(p => p.Name == "Pikachu");
+        context.Pokemons.ShouldContain(p => p.Name == "Pikachu");
     }
 
     [Fact]
@@ -47,9 +47,11 @@ public class PokemonIntegrationTests : IClassFixture<CustomWebApplicationFactory
         var body = await response.Content.ReadAsStringAsync();
         if (response.StatusCode != System.Net.HttpStatusCode.OK)
         {
-            throw new Xunit.Sdk.XunitException($"GraphQL request failed ({(int)response.StatusCode}): {body}");
+            throw new Xunit.Sdk.XunitException(
+                $"GraphQL request failed ({(int)response.StatusCode}): {body}"
+            );
         }
-        body.Should().Contain("\"data\":");
-        body.Should().Contain("\"allPokemon\"");
+        body.ShouldContain("\"data\":");
+        body.ShouldContain("\"allPokemon\"");
     }
 }
